@@ -1,9 +1,8 @@
-import Head from 'next/head'
-import { useState,useEffect } from 'react';
+import Head from 'next/head' 
 const defaultEndpoint = `https://rickandmortyapi.com/api/character/`;
-
-export async function getServerSideProps() {
-  const res = await fetch(defaultEndpoint)
+const { id } = query;
+export async function getServerSideProps({ query }) {
+  const res = await fetch(`${defaultEndpoint}${id}`)
   const data = await res.json();
   return {
     props: {
@@ -12,99 +11,24 @@ export async function getServerSideProps() {
   }
 }
 
-export default function Home({data}) {
-	const { info,results:defaultResults = [] } = data;
-	const [results,updateResults] = useState(defaultResults);
-	console.log('data',data);
-		const [page, updatePage] = useState({
-		  ...info,
-		  current: defaultEndpoint
-		});
-	const { current } = page;
-	
-	useEffect(()=>{
-		if(current === defaultEndpoint ) return;
-			async function request(){
-			 const res = await fetch(current)	
-			 const nextData = await res.json();
-				updatePage({
-					current,
-					...nextData.info
-				});
-				if ( !nextData.info?.prev ){
-						updateResults(nextData.results);
-						return
-					}
-					
-				updateResults(prev =>{
-					    return [
-							...prev,
-							...nextData.results
-						]
-					});
-			}
-		request();			
-	}, [current]);
-					
-	function handleLoadMore(){
-			updatePage(prev => {
-					return {
-				...prev,
-					current:page?.next
-				}
-			})		;
-		}			
-function handleOnSubmitSearch(e) {
-  e.preventDefault();
-
-  const { currentTarget = {} } = e;
-  const fields = Array.from(currentTarget?.elements);
-  const fieldQuery = fields.find(field => field.name === 'query');
-
-  const value = fieldQuery.value || '';
-  const endpoint = `https://rickandmortyapi.com/api/character/?name=${value}`;
-
-  updatePage({
-    current: endpoint
-  });
-}			
+export default function Character({data}) { 
+	const { name, image, gender, location, origin, species, status } = data;
+	console.log('data', data);
   return (
-    <div className="container">
-      <Head>
-        <title>Create Next App</title>
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
-
-      <main>
-        <h1 className="title">
-          Wubba lubba Dubb Dubb!
-        </h1>
-
-        <p className="description">
-          Rick and Morty Wiki Page
-        </p>
-		<form className="search" onSubmit={handleOnSubmitSearch}>
-		  <input name="query" type="search" />
-		  <button>Search</button>
-		</form>
-       <ul className="grid">
-		  {results.map(result => {
-			const { id, name, image } = result;
-			return (
-			  <li key={id} className="card">
-				<a href="#">
-					<img src={image} alt={`${name} Thumbnail`} />
-				  <h3>{ name }</h3>
-				</a>
-			  </li>
-			)
-		  })}
-		</ul>
-			  <p>
-				 <button onClick={handleLoadMore}>Load More</button>
-			 </p> 
-      </main>
-
+     <div className="container">
+		  <Head>
+				<title>{ name }</title>
+				<link rel="icon" href="/favicon.ico" />
+		  </Head> 
+       <main>
+			<h1 className="title">
+			  Wubba lubba Dubb Dubb!
+			</h1>
+				<h2 className="title">{ name }</h2>		
+					<p className="description">
+					  Rick and Morty Wiki Page
+					</p> 
+			  </main> 
       <footer>
         <a
           href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
